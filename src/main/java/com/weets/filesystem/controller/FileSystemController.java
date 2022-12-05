@@ -12,6 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.List;
 
 @RestController
+@RequestMapping("/bank")
 public class FileSystemController {
     @Autowired
     private FileSystemService fileSystemService;
@@ -22,8 +23,8 @@ public class FileSystemController {
     }
 
     @GetMapping("/files")
-    public ResponseEntity<List<FileSystemTreeNode>> findAllChildren(){
-        return ResponseEntity.ok().body(fileSystemService.findContentOf(""));
+    public ResponseEntity<List<FileSystemTreeNode>> findAllChildren(@RequestParam String path){
+        return ResponseEntity.ok().body(fileSystemService.findContentOf(path));
     }
 
     @PostMapping("/files")
@@ -31,9 +32,15 @@ public class FileSystemController {
         return ResponseEntity.ok().body(this.fileSystemService.createNode(node));
     }
 
-    @DeleteMapping("/files/{nodeId}")
-    public ResponseEntity<HttpStatus> removeNode(@PathVariable long nodeId){
-        this.fileSystemService.removeNode(nodeId);
+    @DeleteMapping("/files")
+    public ResponseEntity<HttpStatus> removeNode(@RequestParam String filename){
+        this.fileSystemService.removeNode(filename);
         return new  ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    //@DeleteMapping("/files/{nodeId}")
+    //public ResponseEntity<HttpStatus> removeNode(@PathVariable long nodeId){
+      //  this.fileSystemService.removeNode(nodeId);
+       // return new  ResponseEntity<>(HttpStatus.NO_CONTENT);
+    //}
 }

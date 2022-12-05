@@ -10,18 +10,18 @@ public class FileSystemTreeNode {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name="parent_id")
-    private Long parentId;
-    @Column(name="repository")
-    private Boolean repository;
-    @Column(name="name")
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
+    private String path;
+    @Column(nullable = false)
+    private Boolean repository;
 
 
     protected FileSystemTreeNode(){}
 
-    public FileSystemTreeNode(long parentId, boolean repository, String name){
-        this.parentId = parentId;
+    public FileSystemTreeNode(String name, String path, boolean repository){
+        this.path = path;
         this.repository = repository;
         this.name = name;
     }
@@ -34,12 +34,12 @@ public class FileSystemTreeNode {
         this.id = id;
     }
 
-    public long getParentId() {
-        return parentId;
+    public String getPath() {
+        return path;
     }
 
-    public void setParentId(long parentId) {
-        this.parentId = parentId;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public boolean isRepository() {
