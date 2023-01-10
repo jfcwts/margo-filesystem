@@ -11,10 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,6 +79,34 @@ public class FileSystemServiceImpl implements  FileSystemService{
         bw.newLine();
         bw.close();
         logger.info("file appended successfully");
+    }
+
+    @Override
+    public void concatanateFiles(FileDto fileDto) throws Exception {
+        FileSystemTreeNode nodeToAppend = getNodeFromDto(fileDto.getFilename());
+        if(nodeToAppend.isFolder()){
+            throw new FileSystemException(String.format("this is a folder! ", nodeToAppend.getFormattedFullFilename()));
+        }
+        FileSystemTreeNode nodeToRemove = getNodeFromDto(fileDto.getFilenameOfConcatenatedFile());
+        if(nodeToRemove.isFolder()){
+            throw new FileSystemException(String.format("this is a folder! ", nodeToRemove.getFormattedFullFilename()));
+        }
+
+        StringBuilder sb = new StringBuilder("");
+        BufferedReader br = new BufferedReader(new FileReader(nodeToRemove.getFormattedFullFilename()));
+        String line = br.readLine();
+        while (line != null){
+            sb.append(line);
+            line = br.readLine();
+        }
+        logger.info("content fetched : %s".formatted(sb.toString()));
+
+        fileDto.setAppendedText(sb.toString());
+        appendFile(fileDto);
+        logger.info("file receiver appended");
+
+        removeNode(nodeToRemove.getFilename());
+        logger.info("file concatenated removed");
     }
 
     private FileSystemTreeNode getNodeFromDto(String filename) {

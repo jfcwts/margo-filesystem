@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.util.List;
 
 public interface FileSystemService {
-    FileSystemTreeNode createNode(FileDto fileDto) throws IOException;
+    FileSystemTreeNode createNode(FileDto fileDto) throws Exception;
 
     void removeNode(String filePath);
 
     List<FileSystemTreeNode> findContentOf(String path);
 
-    void appendFile(FileDto fileDto) throws IOException;
+    void appendFile(FileDto fileDto) throws Exception;
+
+    void concatanateFiles(FileDto  fileDto) throws Exception;
 
 }

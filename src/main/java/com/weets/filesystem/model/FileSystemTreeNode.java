@@ -42,6 +42,10 @@ public class FileSystemTreeNode {
         return new File(getFormattedFullFilename());
     }
 
+    public String getFilename(){
+        return "%s/%s".formatted(path, name);
+    }
+
     public long getId() {
         return id;
     }
