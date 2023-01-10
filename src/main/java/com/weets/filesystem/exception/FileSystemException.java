@@ -6,7 +6,4 @@ public class FileSystemException extends RuntimeException{
         super(message);
     }
 
-    public FileSystemException(String message, Throwable throwable){
-        super(message, throwable);
-    }
 }

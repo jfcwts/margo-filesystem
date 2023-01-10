@@ -4,14 +4,22 @@ package com.weets.filesystem.model;
 
 import jakarta.persistence.*;
 
+import java.io.File;
+
 @Entity
 public class FileSystemTreeNode {
+
+    private static final String ROOT_FILE_SYSTEM = "src\\main\\resources\\jfs";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column(nullable = false)
     private String name;
+
+    /**
+     * must always begin by /
+     */
     @Column(nullable = false)
     private String path;
     @Column(nullable = false)
@@ -24,6 +32,14 @@ public class FileSystemTreeNode {
         this.path = path;
         this.repository = repository;
         this.name = name;
+    }
+
+    public String getFormattedFullFilename(){
+        return ROOT_FILE_SYSTEM + getPath().replace("/","\\") + this.name;
+    }
+
+    public File getFile(){
+        return new File(getFormattedFullFilename());
     }
 
     public long getId() {
