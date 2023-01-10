@@ -10,6 +10,9 @@ public interface FileSystemService {
     FileSystemTreeNode createNode(FileDto fileDto) throws IOException;
 
     void removeNode(String filePath);
+
     List<FileSystemTreeNode> findContentOf(String path);
+
+    void appendFile(FileDto fileDto) throws IOException;
 
 }

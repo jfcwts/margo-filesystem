@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -29,21 +31,6 @@ public class FileSystemServiceImpl implements  FileSystemService{
 
     @Override
     public FileSystemTreeNode createNode(FileDto fileDto) throws IOException {
-        /*Matcher m = PATH_PATTERN.matcher(node.getPath());
-        if(!m.find()) {
-            throw new IllegalArgumentException(String.format("(%s) is not a path", node.getPath()));
-        }
-
-        String subPath = m.group(1);
-        String folderPath = ROOT_FILE_SYSTEM + subPath.replace("/","\\");
-        if(!Files.exists(Path.of(folderPath))) {
-            throw new FileSystemException(String.format("(%s) repository does not exists ",node.getPath()));
-        }
-
-        String filePath = ROOT_FILE_SYSTEM + node.getPath().replace("/","\\");
-        if(Files.exists(Path.of(filePath))){
-            throw new FileSystemException(String.format("(%s) file already exists ",node.getPath()));
-        }*/
 
         Matcher m = PATH_PATTERN.matcher(fileDto.getFilename());
         if(!m.find()){
@@ -59,16 +46,48 @@ public class FileSystemServiceImpl implements  FileSystemService{
         if(!newFile.createNewFile()){
             throw new FileSystemException(String.format("(%s) file already exists ",node.getPath()));
         }
+        logger.info("file created successfully");
         return nodeRepository.save(node);
 
     }
 
 
     @Override
-    public void removeNode(String filePath) {
-        Matcher m = PATH_PATTERN.matcher(filePath);
+    public void removeNode(String filename) {
+
+        FileSystemTreeNode nodeToDelete = getNodeFromDto(filename);
+        File  fileToDelete = nodeToDelete.getFile();
+        if(!fileToDelete.delete()){
+            throw new FileSystemException(String.format("failed to delete file", filename));
+        }
+        this.nodeRepository.delete(nodeToDelete);
+        logger.info("file removed successfully");
+    }
+
+    @Override
+    public List<FileSystemTreeNode> findContentOf(String path) {
+        return this.nodeRepository.findByPath(path);
+    }
+
+    @Override
+    public void appendFile(FileDto fileDto) throws IOException {
+        FileSystemTreeNode toAppend = getNodeFromDto(fileDto.getFilename());
+        if(toAppend.isFolder()){
+            throw new FileSystemException(String.format("this is a folder! ", toAppend.getFormattedFullFilename()));
+        }
+
+        FileWriter writer = new FileWriter(toAppend.getFormattedFullFilename(), true);
+        BufferedWriter bw = new BufferedWriter(writer);
+        bw.write(fileDto.getAppendedText());
+        bw.newLine();
+        bw.close();
+        logger.info("file appended successfully");
+    }
+
+    private FileSystemTreeNode getNodeFromDto(String filename) {
+        Matcher m = PATH_PATTERN.matcher(filename);
         if(!m.find()){
-            throw new IllegalArgumentException(String.format("(%s) is not a path", filePath));
+            throw new IllegalArgumentException(String.format("(%s) is not a path", filename));
         }
 
         String path = m.group(1);
@@ -77,22 +96,10 @@ public class FileSystemServiceImpl implements  FileSystemService{
 
         List<FileSystemTreeNode> nodesDb = this.nodeRepository.findByNameAndPath(name, path);
         if(nodesDb.size() == 0) {
-            throw new ResourceNotFoundException(String.format("no node record found for id (%s)", filePath));
+            throw new ResourceNotFoundException(String.format("no node record found for id (%s)", filename));
         }
         logger.info("file found");
 
-        FileSystemTreeNode nodeToDelete = nodesDb.get(0);
-        File  fileToDelete = nodeToDelete.getFile();
-        if(!fileToDelete.delete()){
-            throw new FileSystemException(String.format("failed to delete file", filePath));
-        }
-        nodesDb.stream().forEach(node -> this.nodeRepository.delete(node));
-        logger.info("file removed");
-    }
-
-    @Override
-    public List<FileSystemTreeNode> findContentOf(String path) {
-        //return this.nodeRepository.findAll().stream().filter((node) -> node.getPathTo().equals(path)).collect(Collectors.toList());
-        return this.nodeRepository.findByPath(path);
+        return nodesDb.get(0);
     }
 }

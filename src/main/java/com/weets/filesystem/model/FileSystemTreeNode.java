@@ -23,14 +23,14 @@ public class FileSystemTreeNode {
     @Column(nullable = false)
     private String path;
     @Column(nullable = false)
-    private Boolean repository;
+    private Boolean folder;
 
 
     protected FileSystemTreeNode(){}
 
-    public FileSystemTreeNode(String name, String path, boolean repository){
+    public FileSystemTreeNode(String name, String path, boolean folder){
         this.path = path;
-        this.repository = repository;
+        this.folder = folder;
         this.name = name;
     }
 
@@ -58,12 +58,12 @@ public class FileSystemTreeNode {
         this.path = path;
     }
 
-    public boolean isRepository() {
-        return repository;
+    public boolean isFolder() {
+        return folder;
     }
 
-    public void setRepository(boolean repository) {
-        this.repository = repository;
+    public void setFolder(boolean folder) {
+        this.folder = folder;
     }
 
     public String getName() {
